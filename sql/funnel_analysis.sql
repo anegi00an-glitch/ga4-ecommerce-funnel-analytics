@@ -1,10 +1,12 @@
--- Google Analytics 4 public sample e-commerce funnel
--- Replace the table reference only if using a copied project dataset.
+-- Independent GA4 funnel analysis
+-- Public source: bigquery-public-data.ga4_obfuscated_sample_ecommerce
 
-WITH user_events AS (
+WITH events AS (
   SELECT
     user_pseudo_id,
     event_name,
+    event_timestamp,
+    device.category AS device_category,
     geo.country AS country,
     traffic_source.source AS source,
     traffic_source.medium AS medium
@@ -20,7 +22,7 @@ user_funnel AS (
     COUNTIF(event_name = 'add_to_cart') > 0 AS added_to_cart,
     COUNTIF(event_name = 'begin_checkout') > 0 AS began_checkout,
     COUNTIF(event_name = 'purchase') > 0 AS purchased
-  FROM user_events
+  FROM events
   GROUP BY user_pseudo_id
 )
 SELECT
@@ -45,7 +47,7 @@ SELECT
 FROM user_funnel
 GROUP BY source, medium
 HAVING COUNT(*) >= 100
-ORDER BY purchase_rate_pct DESC;
+ORDER BY purchase_rate_pct DESC, users DESC;
 
 -- Daily purchase rate
 SELECT
